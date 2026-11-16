@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM Eval Workbench - is this AI feature ready to ship?</title>
+  <meta name="description" content="A PM's eval workbench: golden test set, automated graders, reviewer overrides and a launch gate for an LLM feature.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.anthropic.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <div>
+        <div class="eyebrow">LLM Eval Workbench</div>
+        <h1>Is this AI feature ready to ship?</h1>
+        <p class="lede">Compare two prompt versions against a golden test set, see what regressed, and let a launch gate make the call, not a gut feel.</p>
+      </div>
+      <div class="theme" role="group" aria-label="Theme">
+        <button data-theme-btn="light">Light</button>
+        <button data-theme-btn="auto">Auto</button>
+        <button data-theme-btn="dark">Dark</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card scenario">
+      <div>
+        <div class="eyebrow">Scenario</div>
+        <h2 id="scenario-name"></h2>
+        <p id="scenario-blurb" class="muted"></p>
+      </div>
+      <details>
+        <summary>Store policy the assistant must follow</summary>
+        <ul id="policy" class="policy"></ul>
+      </details>
+    </section>
+
+    <section class="compare card">
+      <label>Baseline (A)<select id="sel-a"></select></label>
+      <button id="swap" class="ghost" title="Swap A and B" aria-label="Swap A and B">⇄</button>
+      <label>Candidate (B)<select id="sel-b"></select></label>
+    </section>
+
+    <div class="grid-2">
+      <section class="card" id="verdict"></section>
+      <section class="card viz-root">
+        <h2 id="chart-title">Score by dimension</h2>
+        <div id="legend" class="legend"></div>
+        <div id="chart-wrap" class="chart-wrap">
+          <div id="chart"></div>
+          <div id="tip" class="tip" role="tooltip" hidden></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>What changed from A to B</h2>
+      <div id="diff" class="diff"></div>
+    </section>
+
+    <section class="card">
+      <h2>Golden set <span class="muted small">12 cases · click a row to see outputs and checks</span></h2>
+      <div class="table-wrap">
+        <table id="cases">
+          <thead><tr><th>ID</th><th>Case</th><th>A</th><th>B</th><th><span class="sr">Expand</span></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card live">
+      <h2>Try your own prompt</h2>
+      <p class="muted">Run the golden set live against Claude with your own API key. The key stays in this tab: it isn't saved and only goes to api.anthropic.com. Use a key with a low spend limit. Or import outputs from any model as JSON: <code>{"name": "...", "outputs": {"C01": "..."}}</code>.</p>
+      <div class="live-grid">
+        <label>Anthropic API key<input id="api-key" type="password" autocomplete="off" placeholder="sk-ant-..."></label>
+        <label>Model
+          <select id="model">
+            <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
+            <option value="claude-haiku-5-5">Claude Haiku 5.5</option>
+            <option value="claude-opus-5-5">Claude Opus 5.5</option>
+          </select>
+        </label>
+      </div>
+      <label>System prompt <span class="muted small">[store policy] is replaced with the policy above</span>
+        <textarea id="live-prompt" rows="5"></textarea></label>
+      <div class="actions">
+        <button id="run" class="primary">Run golden set</button>
+        <label class="file ghost">Import outputs<input id="import" type="file" accept="application/json"></label>
+        <button id="export" class="ghost">Export report</button>
+        <button id="reset" class="ghost">Reset demo</button>
+        <span id="live-status" class="muted small" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section class="card notes">
+      <h2>How to read this</h2>
+      <ul>
+        <li><strong>Golden set:</strong> 12 realistic messages, including the ones that break assistants: prompt injection, a shared OTP, a health question, an angry repeat complaint and a Hinglish message.</li>
+        <li><strong>Checks:</strong> each case has simple, explainable graders grouped into Safety, Accuracy and Tone. Simple graders are easy to trust and debug. A reviewer can override any case.</li>
+        <li><strong>Launch gate:</strong> Safety is fixed at 100%, because one unsafe reply is a launch blocker. The other thresholds are editable, because where you set them is a product decision.</li>
+        <li><strong>The lesson in the sample data:</strong> v3 fixes language and length, but quietly stops asking for a photo on damaged items. It still clears the gate, and the regression list is what makes sure someone sees it.</li>
+      </ul>
+      <p class="muted small">All data is synthetic: the store, policy and pre-recorded outputs were written for this demo. Built by Pawan Mehta with Claude Code and Cursor.</p>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
